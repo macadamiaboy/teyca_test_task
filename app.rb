@@ -16,6 +16,15 @@ post '/operation' do
   positions = data['positions']
 
   current_user = users.where(id: user_id).first
+
+  if current_user.nil?
+    status 405
+    return {
+      status: 405,
+      system_message: "There's no such user"
+    }.to_json
+  end
+
   loyalty_level = templates.where(id: current_user[:template_id]).first
 
   discount_percentage = loyalty_level[:discount]
@@ -79,7 +88,7 @@ post '/operation' do
   end
 
   total_price = loyal_price + noloyal_price
-  bonuses = current_user[:bonus].to_i
+  bonuses = current_user[:bonus].to_f
   allowed_write_off = bonuses > loyal_price ? loyal_price : bonuses
 
   total_cashback_percentage = (total_cashback / total_price * 100).round(2)
