@@ -170,11 +170,13 @@ post '/submit' do
 
   correlation = 1 - write_off / current_operation[:allowed_write_off]
 
+  #been decided to get rid of the discount update, as it's not connected to the bonus programm
+
   new_sum = (current_operation[:check_summ] - write_off).to_f.round(2)
   new_cashback = (current_operation[:cashback] * correlation).to_f.round(2)
-  new_discount = (current_operation[:discount] * correlation).to_f.round(2)
+  #new_discount = (current_operation[:discount] * correlation).to_f.round(2)
   new_cashback_percentage = (new_cashback / new_sum).to_f.round(2)
-  new_discount_percentage = (new_cashback / new_sum).to_f.round(2)
+  #new_discount_percentage = (new_cashback / new_sum).to_f.round(2)
 
   new_user_bonuses = (users.where(id: user['id']).first[:bonus] - write_off + new_cashback).to_f.round(2)
 
@@ -183,9 +185,9 @@ post '/submit' do
     write_off: write_off,
     done: true,
     cashback: new_cashback,
-    discount: new_discount,
+    #discount: new_discount,
     cashback_percent: new_cashback_percentage,
-    discount_percent: new_discount_percentage
+    #discount_percent: new_discount_percentage
   )
   users.where(id: user['id']).update(bonus: new_user_bonuses)
 
@@ -196,8 +198,10 @@ post '/submit' do
       user_id: user['id'],
       bonuses_earned: new_cashback,
       total_cashback_percentage: new_cashback_percentage,
-      total_discount: new_discount,
-      total_discount_percentage: new_discount_percentage,
+      #total_discount: new_discount,
+      #total_discount_percentage: new_discount_percentage,
+      total_discount: current_operation[:discount].to_f.round(2),
+      total_discount_percentage: current_operation[:discount_percent].to_f.round(2),
       written_off: write_off,
       sum_to_pay: new_sum
     }
