@@ -180,16 +180,19 @@ post '/submit' do
 
   new_user_bonuses = (users.where(id: user['id']).first[:bonus] - write_off + new_cashback).to_f.round(2)
 
-  operation.update(
-    check_summ: new_sum,
-    write_off: write_off,
-    done: true,
-    cashback: new_cashback,
-    #discount: new_discount,
-    cashback_percent: new_cashback_percentage,
-    #discount_percent: new_discount_percentage
-  )
-  users.where(id: user['id']).update(bonus: new_user_bonuses)
+  #регистрация операции и обновление баланса бонусов обернуты в транзакцию
+  DB.transaction do
+    operation.update(
+      check_summ: new_sum,
+      write_off: write_off,
+      done: true,
+      cashback: new_cashback,
+      #discount: new_discount,
+      cashback_percent: new_cashback_percentage,
+      #discount_percent: new_discount_percentage
+    )
+    users.where(id: user['id']).update(bonus: new_user_bonuses)
+  end
 
   result = {
     status: 200,
